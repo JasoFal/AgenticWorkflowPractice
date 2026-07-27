@@ -1,0 +1,4 @@
+# core.autocrlf is true on the dev machine, which would check files out with
+# CRLF and make `prettier --check` fail locally while passing on Linux CI.
+# Force LF in the working tree so both agree. See CLAUDE.md section 9.
+* text=auto eol=lf
