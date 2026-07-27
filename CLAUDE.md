@@ -19,26 +19,26 @@ All product data comes from the [DummyJSON API](https://dummyjson.com/). Each de
 
 Original requirements, unchanged:
 
-| Layer | Choice | Constraint notes |
-|---|---|---|
-| Front end | React + Vite | Use JavaScript, not TypeScript |
-| State management | Zustand | Use Zustand, not Redux, and name it clearly |
-| Components and styling | [Ply CSS](https://www.plycss.com/) | No other UI libraries |
-| Data source | DummyJSON API | This is the only product data source; no custom product database |
-| Database | Firestore | Only for cart persistence if you reach the Cart phase |
-| Auth | Firebase Auth | Stretch only; skip it unless you have already covered it |
-| Deployment | Vercel | Auto-deploy from GitHub; production tracks main |
+| Layer                  | Choice                             | Constraint notes                                                 |
+| ---------------------- | ---------------------------------- | ---------------------------------------------------------------- |
+| Front end              | React + Vite                       | Use JavaScript, not TypeScript                                   |
+| State management       | Zustand                            | Use Zustand, not Redux, and name it clearly                      |
+| Components and styling | [Ply CSS](https://www.plycss.com/) | No other UI libraries                                            |
+| Data source            | DummyJSON API                      | This is the only product data source; no custom product database |
+| Database               | Firestore                          | Only for cart persistence if you reach the Cart phase            |
+| Auth                   | Firebase Auth                      | Stretch only; skip it unless you have already covered it         |
+| Deployment             | Vercel                             | Auto-deploy from GitHub; production tracks main                  |
 
 ### Additions to the original table
 
 These were not in the original requirements and were decided separately:
 
-| Layer | Choice | Rationale |
-|---|---|---|
-| Routing | React Router v7 | The table named no router but the app needs four pages. Category filter lives in a URL search param so filtered views are shareable. |
-| Testing | Vitest, store only | Cart logic is where bugs hide. UI is verified manually. |
-| Lint / format | ESLint + Prettier | IDE integration for VSCode. See [§8](#8-linting-and-formatting). |
-| Production branch | `production`, not `main` | **Deliberate deviation** from the table's "production tracks main". See [§11](#11-branching-and-release-process). |
+| Layer             | Choice                   | Rationale                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Routing           | React Router v8          | The table named no router but the app needs four pages. Category filter lives in a URL search param so filtered views are shareable. Install `react-router` — **not** `react-router-dom`, which is deprecated and removed in v8. Import `BrowserRouter`, `Routes`, `Route`, `Link` from `react-router`; DOM-only APIs come from `react-router/dom`. Requires Node ≥22.22 and React ≥19.2.7. |
+| Testing           | Vitest, store only       | Cart logic is where bugs hide. UI is verified manually.                                                                                                                                                                                                                                                                                                                                     |
+| Lint / format     | ESLint + Prettier        | IDE integration for VSCode. See [§8](#8-linting-and-formatting).                                                                                                                                                                                                                                                                                                                            |
+| Production branch | `production`, not `main` | **Deliberate deviation** from the table's "production tracks main". See [§11](#11-branching-and-release-process).                                                                                                                                                                                                                                                                           |
 
 ## 3. Hard constraints
 
@@ -109,6 +109,7 @@ import 'ply-css/dist/css/ply.min.css'
 Use these. Do not invent class names — if something is needed that isn't here, check the docs or the bundled snippets rather than guessing.
 
 **Layout / grid**
+
 - `units-container` — wrapper, max-width 1200px, centered
 - `units-row` — flex row
 - `unit-10`, `unit-12`, `unit-20`, `unit-25`, `unit-30`, `unit-33`, `unit-35`, `unit-38`, `unit-40`, `unit-50`, `unit-60`, `unit-62`, `unit-65`, `unit-66`, `unit-70`, `unit-75`, `unit-80`, `unit-88`, `unit-90`, `unit-100`, `unit-auto`
@@ -119,6 +120,7 @@ Use these. Do not invent class names — if something is needed that isn't here,
 - `fill-width` — edge-to-edge
 
 **Buttons** — base `btn`, plus:
+
 - `btn-primary`, `btn-secondary`, `btn-primary-outline`, `btn-secondary-outline`, `btn-ghost`, `btn-outline`
 - Colors: `btn-blue`, `btn-red`, `btn-green`, `btn-yellow`, `btn-black`
 - Sizes: `btn-lg`, `btn-sm`, `btn-xs`
@@ -139,13 +141,13 @@ After `npm install`, real examples live at `node_modules/ply-css/snippets/`:
 
 Base URL: `https://dummyjson.com`. All fetches go in `src/api/dummyjson.js` with a single `BASE_URL` constant.
 
-| Endpoint | Returns |
-|---|---|
-| `GET /products?limit=&skip=` | `{ products, total, skip, limit }` |
-| `GET /products/:id` | a single product object |
-| `GET /products/categories` | `[{ slug, name, url }]` |
+| Endpoint                       | Returns                            |
+| ------------------------------ | ---------------------------------- |
+| `GET /products?limit=&skip=`   | `{ products, total, skip, limit }` |
+| `GET /products/:id`            | a single product object            |
+| `GET /products/categories`     | `[{ slug, name, url }]`            |
 | `GET /products/category/:slug` | `{ products, total, skip, limit }` |
-| `GET /products/search?q=` | `{ products, total, skip, limit }` |
+| `GET /products/search?q=`      | `{ products, total, skip, limit }` |
 
 **Verified product fields:** `id`, `title`, `description`, `category`, `price`, `discountPercentage`, `rating`, `stock`, `tags[]`, `brand`, `sku`, `weight`, `dimensions`, `warrantyInformation`, `shippingInformation`, `availabilityStatus`, `reviews[]`, `returnPolicy`, `minimumOrderQuantity`, `meta`, `thumbnail`, `images[]`.
 
@@ -166,10 +168,14 @@ Dev dependencies:
 npm install -D eslint @eslint/js eslint-plugin-react-hooks eslint-plugin-react-refresh globals prettier eslint-config-prettier
 ```
 
-`eslint.config.js` uses **flat config** (ESLint 9+). Start from what `npm create vite@latest` scaffolds for the React JS template, then:
+`eslint.config.js` uses **flat config** (ESLint 10). It is hand-written — `npm create vite@latest` no longer scaffolds an ESLint config. As of create-vite v9 the React template ships **`oxlint`** instead, which phase 0 removed (`.oxlintrc.json` deleted, `oxlint` devDependency dropped). Do not reintroduce it; §2 commits this project to ESLint.
 
-- Add `eslint-config-prettier` **last** in the extends chain so it disables stylistic rules that would fight Prettier.
-- Add a `files: ['**/*.test.js']` block with Vitest globals so test files don't trip `no-undef`.
+The config composes, in order:
+
+- `js.configs.recommended`, then `eslint-plugin-react-hooks` via `configs['recommended-latest']` and `eslint-plugin-react-refresh` via `configs.vite`.
+- A `files: ['**/*.{js,jsx}']` block with `globals.browser` and JSX parsing enabled.
+- A `files: ['**/*.test.js']` block with Vitest globals so store tests don't trip `no-undef` (`vite.config.js` sets `test.globals = true`).
+- `eslint-config-prettier/flat` **last**, so it disables stylistic rules that would fight Prettier.
 
 **Do not install `eslint-plugin-prettier`.** Running Prettier as an ESLint rule is discouraged and makes lint runs slower. Keep the two tools separate.
 
@@ -212,6 +218,12 @@ Both files are committed so the editor config travels with the repo.
 
 `files.eol` is pinned to `\n` because this is a Windows machine and Prettier's `--check` will fail on CRLF in CI otherwise.
 
+That setting only governs the editor. `core.autocrlf` is `true` on this machine, so git itself would still check files out with CRLF and break `format:check` locally. `.gitattributes` closes that gap:
+
+```
+* text=auto eol=lf
+```
+
 ## 10. Git worktree subagent workflow
 
 Each feature phase is built by a subagent in its own git worktree on branch `feat/<phase>`.
@@ -224,6 +236,7 @@ git worktree add ../Agentic-worktrees/feat-product-list -b feat/product-list
 
 **Gotchas that will bite otherwise:**
 
+- **`EnterWorktree` creates worktrees inside the repo**, at `.claude/worktrees/<name>`, and names the branch `worktree-<name>` — rename it to `feat/<phase>` to match this convention. That directory is gitignored so the nested worktree's files don't show up as untracked in the parent.
 - **`node_modules` is not shared across worktrees.** Every new worktree needs its own `npm ci` before anything runs.
 - **`.env.local` is gitignored, so it does not appear in a new worktree.** Copy it in manually if the phase needs Firebase config.
 - **Remove finished worktrees** with `git worktree remove <path>` so stale directories don't pile up. `git worktree list` shows what exists.
@@ -267,7 +280,9 @@ production            Vercel Production Branch → live URL
 
 GitHub Actions runs checks. **It does not deploy** — deployment is entirely Vercel's GitHub integration (see [§13](#13-deployment)).
 
-**`.github/workflows/ci.yml`** — on `pull_request` targeting `main` or `production`, and on push to both. Node 20, `npm ci`, then in order: `npm run lint`, `npm run format:check`, `npm test`, `npm run build`.
+**`.github/workflows/ci.yml`** — on `pull_request` targeting `main` or `production`, and on push to both. Node 24, `npm ci`, then in order: `npm run lint`, `npm run format:check`, `npm test`, `npm run build`.
+
+Node 24, not 20: React Router v8 requires Node ≥22.22 and Vite 8 requires ≥22.12, so a Node 20 runner fails to install. `package.json` pins the same floor via `"engines": { "node": ">=22.22" }`. Set the Vercel project's Node.js version to 24 as well so all three agree.
 
 Note: a workflow file must exist on a branch for a push to that branch to trigger it. Since `main` merges into `production`, the workflows land there with the first release.
 
@@ -305,9 +320,9 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          plugin_marketplaces: "https://github.com/anthropics/claude-code.git"
-          plugins: "code-review@claude-code-plugins"
-          prompt: "/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
+          plugins: 'code-review@claude-code-plugins'
+          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
 ```
 
 ## 13. Deployment
@@ -346,16 +361,16 @@ Then `/mcp` to authorize via OAuth.
 
 One PR each, independently shippable:
 
-| # | Phase | Contents |
-|---|---|---|
-| 0 | Scaffold | Vite React JS, Ply CSS, Zustand, React Router, ESLint/Prettier, `.vscode/`, CI workflows, Vercel connection |
-| 1 | Layout shell | Ply navbar, `units-container` layout, routes wired to placeholder pages |
-| 2 | Home | Featured products from `/products?limit=N` |
-| 3 | Listing | `/products` with category filter via `?category=` search param |
-| 4 | Detail | `/products/:id` with `images[]` gallery |
-| 5 | Cart | `useCartStore` + Vitest coverage of the store |
-| 6 | Persistence | Firestore cart persistence |
-| 7 | Stretch | Firebase Auth — only if explicitly asked |
+| #   | Phase        | Contents                                                                                                    |
+| --- | ------------ | ----------------------------------------------------------------------------------------------------------- |
+| 0   | Scaffold     | Vite React JS, Ply CSS, Zustand, React Router, ESLint/Prettier, `.vscode/`, CI workflows, Vercel connection |
+| 1   | Layout shell | Ply navbar, `units-container` layout, routes wired to placeholder pages                                     |
+| 2   | Home         | Featured products from `/products?limit=N`                                                                  |
+| 3   | Listing      | `/products` with category filter via `?category=` search param                                              |
+| 4   | Detail       | `/products/:id` with `images[]` gallery                                                                     |
+| 5   | Cart         | `useCartStore` + Vitest coverage of the store                                                               |
+| 6   | Persistence  | Firestore cart persistence                                                                                  |
+| 7   | Stretch      | Firebase Auth — only if explicitly asked                                                                    |
 
 ## 16. Commands
 
