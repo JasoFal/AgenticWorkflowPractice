@@ -1,13 +1,32 @@
-// Phase 0 placeholder. The navbar, layout shell, and routes arrive in phase 1
-// (CLAUDE.md section 15). This exists only to prove Ply CSS is bundled and applied.
+import { Route, Routes } from 'react-router'
+import Navbar from './components/Navbar.jsx'
+import Home from './pages/Home.jsx'
+import ProductList from './pages/ProductList.jsx'
+import ProductDetail from './pages/ProductDetail.jsx'
+import Cart from './pages/Cart.jsx'
+import NotFound from './pages/NotFound.jsx'
+
+// Layout order follows Ply's navbar-page.html: the skip link first, then a
+// full-bleed nav.navbar outside the container, then units-container wrapping
+// main#main. BrowserRouter is mounted in main.jsx.
 export default function App() {
   return (
-    <main className="units-container">
-      <h1>Agentic Storefront</h1>
-      <p>Phase 0 scaffold — Ply CSS, Zustand, and React Router are wired up.</p>
-      <button className="btn btn-primary" type="button">
-        Ply button
-      </button>
-    </main>
+    <>
+      <a href="#main" className="skip-link">
+        Skip to main content
+      </a>
+      <Navbar />
+      <div className="units-container">
+        <main id="main">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<ProductList />} />
+            <Route path="/products/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
+    </>
   )
 }
