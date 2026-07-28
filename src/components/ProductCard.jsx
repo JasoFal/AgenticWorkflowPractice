@@ -1,19 +1,15 @@
 import { Link } from 'react-router'
+import { useCartStore } from '../store/cartStore.js'
+import { formatPrice } from '../lib/formatPrice.js'
 
 // Built from Ply helpers rather than a `.card` class — Ply has no card
 // component. card.html defines `.card` in its own inline <style> block, so
 // copying that snippet verbatim yields unstyled markup. `border`,
 // `border-radius`, and `padding` are real Ply classes and need no custom CSS.
-
-// Module scope: constructing an Intl formatter is not free, and it never varies.
-const priceFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-})
-
 export default function ProductCard({ product }) {
   const titleId = `product-${product.id}-title`
   const href = `/products/${product.id}`
+  const add = useCartStore((s) => s.add)
 
   return (
     <article className="border border-radius padding" aria-labelledby={titleId}>
@@ -31,7 +27,18 @@ export default function ProductCard({ product }) {
       <h3 id={titleId}>
         <Link to={href}>{product.title}</Link>
       </h3>
-      <p>{priceFormatter.format(product.price)}</p>
+      <p>{formatPrice(product.price)}</p>
+      <button
+        type="button"
+        className="btn btn-sm btn-primary"
+        // The visible label is just "Add to cart" on every card, so the
+        // accessible name has to carry the product or a screen reader hears
+        // the same button repeated down the grid.
+        aria-label={`Add ${product.title} to cart`}
+        onClick={() => add(product)}
+      >
+        Add to cart
+      </button>
     </article>
   )
 }

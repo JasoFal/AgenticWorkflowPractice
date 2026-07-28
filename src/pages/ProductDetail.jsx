@@ -2,11 +2,8 @@ import { useEffect } from 'react'
 import { Link, useParams } from 'react-router'
 import { useProductStore } from '../store/productStore.js'
 import ProductGallery from '../components/ProductGallery.jsx'
-
-const priceFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-})
+import AddToCart from '../components/AddToCart.jsx'
+import { formatPrice } from '../lib/formatPrice.js'
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -85,7 +82,7 @@ export default function ProductDetail() {
           </p>
 
           <p>
-            <strong>{priceFormatter.format(product.price)}</strong>{' '}
+            <strong>{formatPrice(product.price)}</strong>{' '}
             {product.discountPercentage > 0 && (
               <span className="badge">
                 {product.discountPercentage}% off available
@@ -97,6 +94,8 @@ export default function ProductDetail() {
             Rating: {product.rating} / 5 &middot; {product.availabilityStatus} (
             {product.stock} in stock)
           </p>
+
+          <AddToCart product={product} />
 
           <p>{product.description}</p>
 
