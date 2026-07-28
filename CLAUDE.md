@@ -63,6 +63,12 @@ src/
   api/dummyjson.js         all DummyJSON fetches, single BASE_URL
   store/cartStore.js       useCartStore
   store/productStore.js    useProductStore
+  hooks/useCartPersistence.js  loads the cart on start, saves on change
+  lib/formatPrice.js       shared Intl currency formatter
+  lib/firebaseConfig.js    reads VITE_FIREBASE_* — imports no firebase SDK
+  lib/firestoreCart.js     Firestore read/write, dynamically imported only
+  lib/cartPersistence.js   Firestore-or-localStorage façade
+  lib/cartId.js            random cart id kept in localStorage
   components/              Ply-classed presentational components
   pages/
     Home.jsx
@@ -79,7 +85,7 @@ Category filtering uses a search param — `/products?category=beauty` — not a
 
 Store names are explicit, per the "name it clearly" constraint:
 
-- **`useCartStore`** (`src/store/cartStore.js`) — `items`, `add(product, qty)`, `remove(id)`, `setQuantity(id, qty)`, `clear()`.
+- **`useCartStore`** (`src/store/cartStore.js`) — `items`, `add(product, qty)`, `remove(id)`, `setQuantity(id, qty)`, `clear()`, plus `hydrate(items)` for restoring a persisted cart and `reset()` for tests. Item count and subtotal are exported as the `selectItemCount` / `selectSubtotal` selectors, never stored.
 - **`useProductStore`** (`src/store/productStore.js`) — `products`, `categories`, `selectedCategory`, `loading`, `error`, and the actions that populate them.
 
 Rules:
@@ -334,7 +340,7 @@ Vercel's GitHub integration, which auto-deploys every push and every PR with no 
 1. Import the GitHub repo at [vercel.com/new](https://vercel.com/new).
 2. **Set the Production Branch to `production`**: Project Settings → Environments → Production → Branch Tracking. This is the step that makes the two-branch model work; skipping it leaves `main` deploying to production.
 3. Create the `production` branch: `git branch production` and push it.
-4. When the Cart phase arrives, add `VITE_`-prefixed Firebase env vars in Project Settings → Environment Variables.
+4. For Firestore cart persistence, add the six `VITE_FIREBASE_*` vars in Project Settings → Environment Variables. `.env.example` lists them and includes the Firestore security rules the `carts` collection needs. **The app runs fine without them** — persistence falls back to `localStorage` and the Firebase SDK is never loaded.
 5. Optional: assign a staging domain to the `main` branch for a stable pre-production URL.
 
 Notes:

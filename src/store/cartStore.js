@@ -56,6 +56,11 @@ export const useCartStore = create((set) => ({
 
   clear: () => set(initialState),
 
+  // Replaces items wholesale from persisted storage. Separate from add() so
+  // restoring a saved cart can't be confused with a user action, and so
+  // useCartPersistence has a single obvious entry point.
+  hydrate: (items) => set({ items: Array.isArray(items) ? items : [] }),
+
   reset: () => set(initialState),
 }))
 
