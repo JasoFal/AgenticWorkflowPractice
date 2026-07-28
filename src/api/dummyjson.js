@@ -20,6 +20,12 @@ export function fetchProducts({ limit = 30, skip = 0 } = {}) {
   return request(`/products?limit=${limit}&skip=${skip}`)
 }
 
+// A single product object. 404s for unknown ids, which request() turns into
+// a thrown Error rather than a silent undefined.
+export function fetchProduct(id) {
+  return request(`/products/${encodeURIComponent(id)}`)
+}
+
 // Returns [{ slug, name, url }] — objects, not strings. Section 7.
 export function fetchCategories() {
   return request('/products/categories')

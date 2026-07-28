@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import {
   fetchCategories,
+  fetchProduct,
   fetchProducts,
   fetchProductsByCategory,
 } from '../api/dummyjson.js'
@@ -9,6 +10,7 @@ import {
 // `reset()` restores initialState between tests. See CLAUDE.md section 5.
 const initialState = {
   products: [],
+  product: null,
   categories: [],
   selectedCategory: null,
   total: 0,
@@ -39,6 +41,19 @@ export const useProductStore = create((set) => ({
         selectedCategory,
         error: err.message,
       }))
+    }
+  },
+
+  // Shares `loading`/`error` with loadProducts — only one page is mounted at a
+  // time, so they can't collide. `product` is cleared up front so a stale
+  // product never flashes while the next one is in flight.
+  loadProduct: async (id) => {
+    set({ loading: true, error: null, product: null })
+
+    try {
+      set({ product: await fetchProduct(id), loading: false })
+    } catch (err) {
+      set({ product: null, loading: false, error: err.message })
     }
   },
 
