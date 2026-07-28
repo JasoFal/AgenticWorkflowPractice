@@ -19,3 +19,15 @@ async function request(path) {
 export function fetchProducts({ limit = 30, skip = 0 } = {}) {
   return request(`/products?limit=${limit}&skip=${skip}`)
 }
+
+// Returns [{ slug, name, url }] — objects, not strings. Section 7.
+export function fetchCategories() {
+  return request('/products/categories')
+}
+
+// Same envelope as fetchProducts, scoped to one category slug.
+export function fetchProductsByCategory(slug, { limit = 30, skip = 0 } = {}) {
+  return request(
+    `/products/category/${encodeURIComponent(slug)}?limit=${limit}&skip=${skip}`,
+  )
+}
